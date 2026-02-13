@@ -11,14 +11,10 @@ Quick guide to get screenshot capture + mouse/keyboard control working with Clau
 - Linux VM with a **Wayland** desktop session (GNOME on Wayland is easiest)
 - At least one screenshot tool installed: `gnome-screenshot`, `grim`, `ksnip`, or `spectacle`
 - Python 3.8+
-- `evemu-tools` (installed automatically by setup.sh on Debian/Ubuntu)
+- `evemu-tools` (installed automatically by `setup_on_fedora.sh` on Fedora; see manual instructions below for other distros)
 
-For a quick Fedora/GNOME Wayland VM:
+The setup script auto-installs `evemu` and `gnome-screenshot` on Fedora (via dnf). For **Ubuntu/Debian**, install manually:
 ```bash
-# Fedora
-sudo dnf install evemu gnome-screenshot
-
-# Ubuntu/Debian
 sudo apt install evemu-tools gnome-screenshot
 ```
 
@@ -46,12 +42,12 @@ This grants permissions for mouse/keyboard simulation via `evemu-event`. Safe in
 
 ```bash
 cd wayland-mcp
-chmod +x setup.sh
-./setup.sh
+chmod +x setup_on_fedora.sh
+./setup_on_fedora.sh
 ```
 
 What it does:
-- Installs `evemu-tools` if missing
+- Installs `evemu` and `gnome-screenshot` if missing (auto-detects dnf/apt/brew)
 - Sets permissions so `evemu-event` works without sudo
 - Makes `/dev/input/event*` devices writable (needed for input simulation)
 
@@ -145,10 +141,10 @@ Once configured, you can ask Claude Code things like:
 
 **"No suitable mouse device found"**
 - Run `ls -la /dev/input/event*` - devices should be writable (`rw-rw-rw-`)
-- Re-run `./setup.sh` if permissions were reset
+- Re-run `./setup_on_fedora.sh` if permissions were reset
 
 **"No suitable keyboard device found"**
-- Same as above - `setup.sh` must have completed successfully
+- Same as above - `setup_on_fedora.sh` must have completed successfully
 
 **Screenshot tools fail**
 - Verify you're in a Wayland session: `echo $XDG_SESSION_TYPE` should print `wayland`
