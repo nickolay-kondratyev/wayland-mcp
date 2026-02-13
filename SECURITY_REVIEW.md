@@ -31,7 +31,7 @@ This package is a **legitimate MCP (Model Context Protocol) server** that provid
 
 ## Findings
 
-### 1. CRITICAL: `setup_on_fedora.sh` Makes Aggressive System Permission Changes
+### 1. CRITICAL: `setup_on_fedora_run_in_vm.sh` Makes Aggressive System Permission Changes
 
 | Line | Action | Risk |
 |------|--------|------|
@@ -120,7 +120,7 @@ This uses `shell=True` but with a **hardcoded** command string (no user input), 
 |----------|--------|-------|
 | **Malware / Backdoors** | NONE | No malicious code found |
 | **Data Exfiltration** | LOW | Screenshots sent to OpenRouter only when VLM features are explicitly used |
-| **System Permission Escalation** | **HIGH** | setup_on_fedora.sh sets world-writable permissions on ALL input devices |
+| **System Permission Escalation** | **HIGH** | setup_on_fedora_run_in_vm.sh sets world-writable permissions on ALL input devices |
 | **Command Injection** | NONE | No injectable command execution |
 | **Supply Chain Risk** | LOW | Minimal deps, all well-known |
 | **Code Obfuscation** | NONE | Code is transparent and readable |
@@ -130,7 +130,7 @@ This uses `shell=True` but with a **hardcoded** command string (no user input), 
 
 ## Recommendations
 
-1. **DO NOT run `setup_on_fedora.sh` as-is** on a shared or production machine. The `chmod 666` on all input devices is dangerous. On a personal single-user workstation, it's acceptable but understand the tradeoff.
+1. **DO NOT run `setup_on_fedora_run_in_vm.sh` as-is** on a shared or production machine. The `chmod 666` on all input devices is dangerous. On a personal single-user workstation, it's acceptable but understand the tradeoff.
 
 2. **Be aware** that using VLM analysis features (capture_and_analyze, analyze_screenshot, compare_images) sends your screen content to OpenRouter's third-party API.
 

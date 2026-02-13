@@ -10,7 +10,7 @@ Quick guide to get screenshot capture + mouse/keyboard control working with Clau
 
 - Linux VM with a **Wayland** desktop session (GNOME on Wayland is easiest)
 - Python 3.8+
-- `evemu-tools` (installed automatically by `setup_on_fedora.sh` on Fedora; see manual instructions below for other distros)
+- `evemu-tools` (installed automatically by `setup_on_fedora_run_in_vm.sh` on Fedora; see manual instructions below for other distros)
 - Virtual environment variables set:
   - `MY_VENV_PYTHON_DIR` — path to the venv directory (e.g. `/home/<user>/MY_PYTHON_VENV`)
   - `MY_VENV_PYTHON_BIN` — path to the venv python binary (e.g. `/home/<user>/MY_PYTHON_VENV/bin/python3`)
@@ -37,8 +37,8 @@ The setup script installs system packages, sets input device permissions, and in
 
 ```bash
 cd tools/desktop-wayland-mcp-control/wayland-mcp
-chmod +x setup_on_fedora.sh
-./setup_on_fedora.sh
+chmod +x setup_on_fedora_run_in_vm.sh
+./setup_on_fedora_run_in_vm.sh
 ```
 
 What it does:
@@ -99,10 +99,10 @@ Once configured, you can ask Claude Code things like:
 
 **"No suitable mouse device found"**
 - Run `ls -la /dev/input/event*` - devices should be writable (`rw-rw-rw-`)
-- Re-run `./setup_on_fedora.sh` if permissions were reset
+- Re-run `./setup_on_fedora_run_in_vm.sh` if permissions were reset
 
 **"No suitable keyboard device found"**
-- Same as above - `setup_on_fedora.sh` must have completed successfully
+- Same as above - `setup_on_fedora_run_in_vm.sh` must have completed successfully
 
 **Screenshot tools fail**
 - Verify you're in a Wayland session: `echo $XDG_SESSION_TYPE` should print `wayland`

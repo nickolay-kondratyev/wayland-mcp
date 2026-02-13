@@ -34,9 +34,9 @@
 
 ### 🔧 Input Control Setup
 ```bash
-./setup_on_fedora.sh
+./setup_on_fedora_run_in_vm.sh
 ```
-[View setup_on_fedora.sh on GitHub](https://github.com/someaka/wayland-mcp/blob/main/setup_on_fedora.sh)
+[View setup_on_fedora_run_in_vm.sh on GitHub](https://github.com/someaka/wayland-mcp/blob/main/setup_on_fedora_run_in_vm.sh)
 
 Configures permissions for `evemu-event` to control input devices.
 
