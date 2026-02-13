@@ -9,14 +9,10 @@ Quick guide to get screenshot capture + mouse/keyboard control working with Clau
 ## 1. VM Requirements
 
 - Linux VM with a **Wayland** desktop session (GNOME on Wayland is easiest)
-- At least one screenshot tool installed: `gnome-screenshot`, `grim`, `ksnip`, or `spectacle`
 - Python 3.8+
 - `evemu-tools` (installed automatically by `setup_on_fedora.sh` on Fedora; see manual instructions below for other distros)
 
-The setup script auto-installs `evemu` and a screenshot tool (`gnome-screenshot` as default) if none of the supported ones (`gnome-screenshot`, `grim`, `ksnip`, `spectacle`) are found. For **Ubuntu/Debian**, install manually:
-```bash
-sudo apt install evemu-tools gnome-screenshot
-```
+The setup script auto-installs `evemu` and a screenshot tool (`gnome-screenshot` as default) if none of the supported ones (`gnome-screenshot`, `grim`, `ksnip`, `spectacle`) are found. 
 
 ## 2. Install wayland-mcp (From Source)
 
