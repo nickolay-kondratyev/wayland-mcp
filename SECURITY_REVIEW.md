@@ -31,15 +31,15 @@ This package is a **legitimate MCP (Model Context Protocol) server** that provid
 
 ## Findings
 
-### 1. CRITICAL: `setup.sh` Makes Aggressive System Permission Changes
+### 1. CRITICAL: `setup_on_fedora.sh` Makes Aggressive System Permission Changes
 
 | Line | Action | Risk |
 |------|--------|------|
-| 16 | `sudo chmod u+s /usr/bin/evemu-event` | **SETUID bit** on a system binary - allows any user to run it as root |
-| 21 | Adds NOPASSWD sudoers rule for evemu-event | Permanent passwordless sudo for this binary |
-| 34 | `sudo usermod -aG input $USER` | Adds user to input group (reasonable) |
-| 38-39 | `sudo chmod 666 /dev/input/event*` | **Makes ALL input devices world-writable** - any process can inject keystrokes/mouse events |
-| 44-45 | Creates udev rule with `MODE="0666"` for all event devices | **Persists** world-writable permissions across reboots |
+| 53 | `sudo chmod u+s /usr/bin/evemu-event` | **SETUID bit** on a system binary - allows any user to run it as root |
+| 59 | Adds NOPASSWD sudoers rule for evemu-event | Permanent passwordless sudo for this binary |
+| 72 | `sudo usermod -aG input $USER` | Adds user to input group (reasonable) |
+| 76-78 | `sudo chmod 666 /dev/input/event*` | **Makes ALL input devices world-writable** - any process can inject keystrokes/mouse events |
+| 82-85 | Creates udev rule with `MODE="0666"` for all event devices | **Persists** world-writable permissions across reboots |
 
 **Verdict**: The setup script is **overly permissive**. Setting `chmod 666` on all `/dev/input/event*` devices means **any unprivileged process** on the system can read your keystrokes (keylogger) or inject input. The setuid bit on `evemu-event` is also concerning. While these permissions are needed for the tool to function without root, they significantly weaken system security.
 
@@ -120,7 +120,7 @@ This uses `shell=True` but with a **hardcoded** command string (no user input), 
 |----------|--------|-------|
 | **Malware / Backdoors** | NONE | No malicious code found |
 | **Data Exfiltration** | LOW | Screenshots sent to OpenRouter only when VLM features are explicitly used |
-| **System Permission Escalation** | **HIGH** | setup.sh sets world-writable permissions on ALL input devices |
+| **System Permission Escalation** | **HIGH** | setup_on_fedora.sh sets world-writable permissions on ALL input devices |
 | **Command Injection** | NONE | No injectable command execution |
 | **Supply Chain Risk** | LOW | Minimal deps, all well-known |
 | **Code Obfuscation** | NONE | Code is transparent and readable |
@@ -130,7 +130,7 @@ This uses `shell=True` but with a **hardcoded** command string (no user input), 
 
 ## Recommendations
 
-1. **DO NOT run `setup.sh` as-is** on a shared or production machine. The `chmod 666` on all input devices is dangerous. On a personal single-user workstation, it's acceptable but understand the tradeoff.
+1. **DO NOT run `setup_on_fedora.sh` as-is** on a shared or production machine. The `chmod 666` on all input devices is dangerous. On a personal single-user workstation, it's acceptable but understand the tradeoff.
 
 2. **Be aware** that using VLM analysis features (capture_and_analyze, analyze_screenshot, compare_images) sends your screen content to OpenRouter's third-party API.
 
