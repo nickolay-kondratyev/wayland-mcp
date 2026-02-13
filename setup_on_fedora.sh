@@ -51,7 +51,20 @@ main() {
 
   # 1. Install required packages
   install_if_missing evemu evemu-event
-  install_if_missing gnome-screenshot gnome-screenshot
+
+  # Install a screenshot tool if none of the supported ones are available.
+  local screenshot_tools=(gnome-screenshot grim ksnip spectacle)
+  local has_screenshot_tool=false
+  for tool in "${screenshot_tools[@]}"; do
+    if command -v "${tool}" > /dev/null 2>&1; then
+      echo "Screenshot tool already available: ${tool}"
+      has_screenshot_tool=true
+      break
+    fi
+  done
+  if [[ "${has_screenshot_tool}" == "false" ]]; then
+    install_if_missing gnome-screenshot gnome-screenshot
+  fi
 
   # 2. Immediate solution (current session) for evemu-event
   echo "Setting setuid bit for evemu-event (current session)..."
