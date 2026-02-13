@@ -35,11 +35,11 @@ This package is a **legitimate MCP (Model Context Protocol) server** that provid
 
 | Line | Action | Risk |
 |------|--------|------|
-| 16 | `sudo chmod u+s /usr/bin/evemu-event` | **SETUID bit** on a system binary - allows any user to run it as root |
-| 21 | Adds NOPASSWD sudoers rule for evemu-event | Permanent passwordless sudo for this binary |
-| 34 | `sudo usermod -aG input $USER` | Adds user to input group (reasonable) |
-| 38-39 | `sudo chmod 666 /dev/input/event*` | **Makes ALL input devices world-writable** - any process can inject keystrokes/mouse events |
-| 44-45 | Creates udev rule with `MODE="0666"` for all event devices | **Persists** world-writable permissions across reboots |
+| 53 | `sudo chmod u+s /usr/bin/evemu-event` | **SETUID bit** on a system binary - allows any user to run it as root |
+| 59 | Adds NOPASSWD sudoers rule for evemu-event | Permanent passwordless sudo for this binary |
+| 72 | `sudo usermod -aG input $USER` | Adds user to input group (reasonable) |
+| 76-78 | `sudo chmod 666 /dev/input/event*` | **Makes ALL input devices world-writable** - any process can inject keystrokes/mouse events |
+| 82-85 | Creates udev rule with `MODE="0666"` for all event devices | **Persists** world-writable permissions across reboots |
 
 **Verdict**: The setup script is **overly permissive**. Setting `chmod 666` on all `/dev/input/event*` devices means **any unprivileged process** on the system can read your keystrokes (keylogger) or inject input. The setuid bit on `evemu-event` is also concerning. While these permissions are needed for the tool to function without root, they significantly weaken system security.
 
