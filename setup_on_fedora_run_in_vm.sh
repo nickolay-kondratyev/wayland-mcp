@@ -74,6 +74,17 @@ main() {
     exit 1
   fi
 
+  # Verify Wayland session is active
+  if [[ "${XDG_SESSION_TYPE:-}" != "wayland" ]]; then
+    echo "ERROR: Not a Wayland session (XDG_SESSION_TYPE=[${XDG_SESSION_TYPE:-<unset>}]). wayland-mcp requires a Wayland desktop session (e.g. GNOME on Wayland)."
+    exit 1
+  fi
+
+  if [[ -z "${WAYLAND_DISPLAY:-}" ]]; then
+    echo "ERROR: WAYLAND_DISPLAY is not set. Ensure you are logged into a Wayland session."
+    exit 1
+  fi
+
   # Setup script for evemu-event mouse control permissions
   # Works immediately without reboot or logout
 

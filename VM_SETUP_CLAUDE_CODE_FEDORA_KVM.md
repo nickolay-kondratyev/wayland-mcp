@@ -88,17 +88,11 @@ Once configured, you can ask Claude Code things like:
 
 ## Troubleshooting
 
-**"No suitable mouse device found"**
-- Run `ls -la /dev/input/event*` - devices should be writable (`rw-rw-rw-`)
-- Re-run `./setup_on_fedora_run_in_vm.sh` if permissions were reset
+Run the diagnostic script to automatically check all common issues:
 
-**"No suitable keyboard device found"**
-- Same as above - `setup_on_fedora_run_in_vm.sh` must have completed successfully
+```bash
+cd tools/wayland-mcp
+./troubleshooting.sh
+```
 
-**Screenshot tools fail**
-- Verify you're in a Wayland session: `echo $XDG_SESSION_TYPE` should print `wayland`
-- Verify at least one capture tool is installed: `which gnome-screenshot grim ksnip spectacle`
-
-**MCP server won't connect**
-- Check that the `env` vars in your Claude Code config match your VM's session
-- Run `echo $WAYLAND_DISPLAY` in the VM terminal to get the correct value
+The script checks: Wayland session, input device permissions, evemu-event, screenshot tools, venv setup, wayland-mcp installation, and MCP config correctness. Each check reports PASS/FAIL/WARN with specific fix instructions.

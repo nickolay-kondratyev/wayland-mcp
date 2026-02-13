@@ -24,9 +24,19 @@ if [[ ! -x "${MY_VENV_PYTHON_BIN}" ]]; then
   exit 1
 fi
 
-# --- Build the config ---
+# --- Detect Wayland session values ---
 
 USER_ID="$(id -u)"
+
+# Use actual WAYLAND_DISPLAY from session instead of hardcoding
+WAYLAND_DISPLAY_VALUE="${WAYLAND_DISPLAY:-}"
+if [[ -z "${WAYLAND_DISPLAY_VALUE}" ]]; then
+  WAYLAND_DISPLAY_VALUE="wayland-0"
+  echo "WARN: WAYLAND_DISPLAY is not set, falling back to [${WAYLAND_DISPLAY_VALUE}]. If MCP fails to connect, verify with: echo \$WAYLAND_DISPLAY"
+fi
+
+# --- Build the config ---
+
 CLAUDE_DIR="${SCRIPT_DIR}/.claude"
 MCP_JSON="${CLAUDE_DIR}/mcp.json"
 
@@ -40,8 +50,8 @@ cat > "${MCP_JSON}" <<JSONEOF
       "args": ["-m", "wayland_mcp.server_mcp"],
       "env": {
         "XDG_RUNTIME_DIR": "/run/user/${USER_ID}",
-        "WAYLAND_DISPLAY": "wayland-0",
-        "DISPLAY": ":0",
+        "WAYLAND_DISPLAY": "${WAYLAND_DISPLAY_VALUE}",
+        "DISPLAY": "${DISPLAY:-:0}",
         "XDG_SESSION_TYPE": "wayland"
       }
     }
