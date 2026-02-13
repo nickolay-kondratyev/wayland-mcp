@@ -13,28 +13,22 @@ Quick guide to get screenshot capture + mouse/keyboard control working with Clau
 - Python 3.8+
 - `evemu-tools` (installed automatically by `setup_on_fedora.sh` on Fedora; see manual instructions below for other distros)
 
-The setup script auto-installs `evemu` and `gnome-screenshot` on Fedora (via dnf). For **Ubuntu/Debian**, install manually:
+The setup script auto-installs `evemu` and a screenshot tool (`gnome-screenshot` as default) if none of the supported ones (`gnome-screenshot`, `grim`, `ksnip`, `spectacle`) are found. For **Ubuntu/Debian**, install manually:
 ```bash
 sudo apt install evemu-tools gnome-screenshot
 ```
 
-## 2. Install wayland-mcp (From Reviewed Source)
-
-We install from our own audited copy of the source rather than pulling from PyPI/uvx, so we run exactly the code we reviewed.
+## 2. Install wayland-mcp (From Source)
 
 ```bash
-# Clone our reviewed fork (not upstream)
 git clone git@github.com:nickolay-kondratyev/wayland-mcp.git
 cd wayland-mcp
-
-# Pin to the exact reviewed commit
-git checkout 7c49d4c
 
 # Install from local source
 pip install -e .
 ```
 
-> **Why from source?** Running `uvx wayland-mcp` or `pip install wayland-mcp` pulls whatever is currently published to PyPI, which could differ from what we reviewed. Installing from our pinned commit guarantees we run the audited code.
+> **Why from source?** Running `uvx wayland-mcp` or `pip install wayland-mcp` pulls whatever is currently published to PyPI. Installing from source ensures we run our own code.
 
 ## 3. Run the Setup Script (Input Device Permissions)
 
