@@ -11,60 +11,49 @@ Quick guide to get screenshot capture + mouse/keyboard control working with Clau
 - Linux VM with a **Wayland** desktop session (GNOME on Wayland is easiest)
 - Python 3.8+
 - `evemu-tools` (installed automatically by `setup_on_fedora.sh` on Fedora; see manual instructions below for other distros)
+- Virtual environment variables set:
+  - `MY_VENV_PYTHON_DIR` — path to the venv directory (e.g. `/home/<user>/MY_PYTHON_VENV`)
+  - `MY_VENV_PYTHON_BIN` — path to the venv python binary (e.g. `/home/<user>/MY_PYTHON_VENV/bin/python3`)
+  - `MY_VENV_PIP` — path to the venv pip binary (e.g. `/home/<user>/MY_PYTHON_VENV/bin/pip`)
 
-The setup script auto-installs `evemu` and a screenshot tool (`gnome-screenshot` as default) if none of the supported ones (`gnome-screenshot`, `grim`, `ksnip`, `spectacle`) are found. 
+The setup script auto-installs `evemu` and a screenshot tool (`gnome-screenshot` as default) if none of the supported ones (`gnome-screenshot`, `grim`, `ksnip`, `spectacle`) are found.
 
-## 2. Install wayland-mcp (From Source)
+## 2. Run the Setup Script
+
+The setup script handles everything: installs system packages, sets input device permissions, installs wayland-mcp into your venv, and prints the Claude Code MCP configuration.
 
 ```bash
 git clone git@github.com:nickolay-kondratyev/wayland-mcp.git
-cd wayland-mcp
-
-# Install from local source
-pip install -e .
-```
-
-> **Why from source?** Running `uvx wayland-mcp` or `pip install wayland-mcp` pulls whatever is currently published to PyPI. Installing from source ensures we run our own code.
-
-## 3. Run the Setup Script (Input Device Permissions)
-
-This grants permissions for mouse/keyboard simulation via `evemu-event`. Safe inside a VM:
-
-```bash
 cd wayland-mcp
 chmod +x setup_on_fedora.sh
 ./setup_on_fedora.sh
 ```
 
 What it does:
+- Validates that `MY_VENV_PYTHON_BIN` and `MY_VENV_PIP` are set and executable
 - Installs `evemu` and `gnome-screenshot` if missing (auto-detects dnf/apt/brew)
 - Sets permissions so `evemu-event` works without sudo
 - Makes `/dev/input/event*` devices writable (needed for input simulation)
+- Installs wayland-mcp into the venv via `$MY_VENV_PIP install -e .`
+- Verifies mouse and keyboard device detection
+- Prints the Claude Code MCP configuration JSON with correct paths
 
-## 4. Verify It Works
+> **Why from source?** Running `uvx wayland-mcp` or `pip install wayland-mcp` pulls whatever is currently published to PyPI. Installing from source ensures we run our own code.
 
-```bash
-# Should list a mouse device without errors
-python -c "from wayland_mcp.mouse_utils import MouseController; m = MouseController(); print(f'Mouse device: {m.device}')"
+## 3. Configure Claude Code
 
-# Should list a keyboard device without errors
-python -c "from wayland_mcp.keyboard_utils import KeyboardController; k = KeyboardController(); print(f'Keyboard device: {k.device}')"
-```
+The setup script prints the exact JSON to use. Add it to `~/.claude.json` (global) or `.claude/mcp.json` (project-level).
 
-## 5. Configure Claude Code
-
-Add the MCP server to your Claude Code config. Edit `~/.claude.json` (global) or `.claude/mcp.json` (project-level).
-
-Since we installed from source, point directly to the local Python that has the package:
+The configuration uses `$MY_VENV_PYTHON_BIN` as the command, so the MCP server runs from your venv:
 
 ```json
 {
   "mcpServers": {
     "wayland-mcp": {
-      "command": "python",
+      "command": "$MY_VENV_PYTHON_BIN",
       "args": ["-m", "wayland_mcp.server_mcp"],
       "env": {
-        "XDG_RUNTIME_DIR": "/run/user/1000",
+        "XDG_RUNTIME_DIR": "/run/user/<your-uid>",
         "WAYLAND_DISPLAY": "wayland-0",
         "DISPLAY": ":0",
         "XDG_SESSION_TYPE": "wayland"
@@ -74,36 +63,11 @@ Since we installed from source, point directly to the local Python that has the 
 }
 ```
 
-If you installed into a **venv**, use the full path to that venv's python:
-```json
-{
-  "mcpServers": {
-    "wayland-mcp": {
-      "command": "/home/<user>/wayland-mcp/.venv/bin/python",
-      "args": ["-m", "wayland_mcp.server_mcp"],
-      "env": {
-        "XDG_RUNTIME_DIR": "/run/user/1000",
-        "WAYLAND_DISPLAY": "wayland-0",
-        "DISPLAY": ":0",
-        "XDG_SESSION_TYPE": "wayland"
-      }
-    }
-  }
-}
-```
+> Replace `$MY_VENV_PYTHON_BIN` with the actual path (the setup script output will have it filled in).
 
 > **Note**: The `OPENROUTER_API_KEY` and `VLM_MODEL` env vars are **not needed**. Those are only for the VLM image analysis features. Claude Code can analyze screenshots itself - you just need the capture and input control tools.
 
-### Verify your UID for XDG_RUNTIME_DIR
-
-```bash
-# Should print your numeric user ID (typically 1000)
-id -u
-```
-
-If it's not 1000, update the `XDG_RUNTIME_DIR` value to `/run/user/<your-uid>`.
-
-## 6. Available Tools in Claude Code
+## 4. Available Tools in Claude Code
 
 Once connected, Claude Code will have access to these MCP tools:
 
@@ -118,7 +82,7 @@ Once connected, Claude Code will have access to these MCP tools:
 
 The `analyze_screenshot`, `compare_images`, and `capture_and_analyze` tools exist but require an OpenRouter API key - skip these since Claude Code can analyze images directly.
 
-## 7. Example Usage in Claude Code
+## 5. Example Usage in Claude Code
 
 Once configured, you can ask Claude Code things like:
 

@@ -44,6 +44,26 @@ main() {
     exit 1
   fi
 
+  if [[ -z "${MY_VENV_PYTHON_BIN:-}" ]]; then
+    echo "ERROR: MY_VENV_PYTHON_BIN is not set. Expected path to venv python binary (e.g. /home/user/MY_PYTHON_VENV/bin/python3)."
+    exit 1
+  fi
+
+  if [[ ! -x "${MY_VENV_PYTHON_BIN}" ]]; then
+    echo "ERROR: MY_VENV_PYTHON_BIN=[${MY_VENV_PYTHON_BIN}] is not an executable file."
+    exit 1
+  fi
+
+  if [[ -z "${MY_VENV_PIP:-}" ]]; then
+    echo "ERROR: MY_VENV_PIP is not set. Expected path to venv pip binary (e.g. /home/user/MY_PYTHON_VENV/bin/pip)."
+    exit 1
+  fi
+
+  if [[ ! -x "${MY_VENV_PIP}" ]]; then
+    echo "ERROR: MY_VENV_PIP=[${MY_VENV_PIP}] is not an executable file."
+    exit 1
+  fi
+
   # Setup script for evemu-event mouse control permissions
   # Works immediately without reboot or logout
 
@@ -103,6 +123,47 @@ main() {
   sudo udevadm trigger
 
   echo -e "\nKeyboard setup complete!"
+
+  # 8. Install wayland-mcp into the virtual environment
+  local script_dir
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  echo "Installing wayland-mcp into venv using MY_VENV_PIP=[${MY_VENV_PIP}]..."
+  mkdir -p "${script_dir}/.tmp/"
+  "${MY_VENV_PIP}" install -e "${script_dir}" > "${script_dir}/.tmp/pip_install.log" 2>&1
+  if [[ $? -ne 0 ]]; then
+    echo "ERROR: pip install failed. See .tmp/pip_install.log for details."
+    exit 1
+  fi
+  echo "wayland-mcp installed successfully into venv."
+
+  # 9. Verify wayland-mcp is importable
+  echo "Verifying wayland-mcp installation..."
+  "${MY_VENV_PYTHON_BIN}" -c "from wayland_mcp.mouse_utils import MouseController; m = MouseController(); print(f'Mouse device: {m.device}')" && echo "Mouse verification OK" || echo "Mouse verification FAILED (may need input devices available)"
+  "${MY_VENV_PYTHON_BIN}" -c "from wayland_mcp.keyboard_utils import KeyboardController; k = KeyboardController(); print(f'Keyboard device: {k.device}')" && echo "Keyboard verification OK" || echo "Keyboard verification FAILED (may need input devices available)"
+
+  # 10. Display Claude Code MCP configuration
+  echo ""
+  echo "=== Claude Code MCP Configuration ==="
+  echo "Add the following to ~/.claude.json or .claude/mcp.json:"
+  echo ""
+  cat <<JSONEOF
+{
+  "mcpServers": {
+    "wayland-mcp": {
+      "command": "${MY_VENV_PYTHON_BIN}",
+      "args": ["-m", "wayland_mcp.server_mcp"],
+      "env": {
+        "XDG_RUNTIME_DIR": "/run/user/$(id -u)",
+        "WAYLAND_DISPLAY": "wayland-0",
+        "DISPLAY": ":0",
+        "XDG_SESSION_TYPE": "wayland"
+      }
+    }
+  }
+}
+JSONEOF
+  echo ""
+  echo "Setup complete!"
 }
 
 main "${@}"
