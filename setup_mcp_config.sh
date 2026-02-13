@@ -1,18 +1,16 @@
 #!/usr/bin/env bash
-# Creates .claude/mcp.json in the specified directory so that wayland-mcp
-# is only active when Claude Code is started from that directory.
+# Creates .claude/mcp.json in this directory so that wayland-mcp
+# is active when Claude Code is started from this directory.
 #
-# Usage (from a consuming project where wayland-mcp is a submodule):
-#   $PROJECT_ROOT/tools/desktop-wayland-mcp-control/wayland-mcp/setup_mcp_config.sh \
-#       "$PROJECT_ROOT/tools/desktop-wayland-mcp-control"
+# Usage:
+#   ./setup_mcp_config.sh
 #
-# If no argument is given, defaults to the parent of the script's directory
-# (correct when the submodule is at <mcp-control-dir>/wayland-mcp/).
+# The generated .claude/mcp.json is git-ignored since it contains
+# machine-specific paths (venv python binary, user ID).
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MCP_CONTROL_DIR="${1:-$(dirname "${SCRIPT_DIR}")}"
 
 # --- Validate inputs ---
 
@@ -26,15 +24,10 @@ if [[ ! -x "${MY_VENV_PYTHON_BIN}" ]]; then
   exit 1
 fi
 
-if [[ ! -d "${MCP_CONTROL_DIR}" ]]; then
-  echo "ERROR: MCP_CONTROL_DIR=[${MCP_CONTROL_DIR}] is not a directory."
-  exit 1
-fi
-
 # --- Build the config ---
 
 USER_ID="$(id -u)"
-CLAUDE_DIR="${MCP_CONTROL_DIR}/.claude"
+CLAUDE_DIR="${SCRIPT_DIR}/.claude"
 MCP_JSON="${CLAUDE_DIR}/mcp.json"
 
 mkdir -p "${CLAUDE_DIR}"
@@ -57,4 +50,4 @@ cat > "${MCP_JSON}" <<JSONEOF
 JSONEOF
 
 echo "MCP config written to [${MCP_JSON}]"
-echo "wayland-mcp will activate only when Claude Code is started from [${MCP_CONTROL_DIR}]"
+echo "Start Claude Code from [${SCRIPT_DIR}] for wayland-mcp to activate."

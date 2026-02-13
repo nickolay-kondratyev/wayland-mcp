@@ -20,23 +20,22 @@ The setup script auto-installs `evemu` and a screenshot tool (`gnome-screenshot`
 
 ## 2. Add wayland-mcp as a Submodule
 
-In your project, add wayland-mcp as a submodule under a dedicated control directory. This directory scopes the MCP server so it only activates when Claude Code is started from there (not from your project root).
+In your project, add wayland-mcp as a submodule:
 
 ```bash
 # From your project root
-mkdir -p tools/desktop-wayland-mcp-control
 git submodule add git@github.com:nickolay-kondratyev/wayland-mcp.git \
-    tools/desktop-wayland-mcp-control/wayland-mcp
+    tools/wayland-mcp
 ```
 
 > **Why from source?** Running `uvx wayland-mcp` or `pip install wayland-mcp` pulls whatever is currently published to PyPI. Installing from source ensures we run our own code.
 
 ## 3. Run the Setup Script
 
-The setup script installs system packages, sets input device permissions, and installs wayland-mcp into your venv.
+The setup script installs system packages, sets input device permissions, installs wayland-mcp into your venv, and generates `.claude/mcp.json` in the wayland-mcp directory.
 
 ```bash
-cd tools/desktop-wayland-mcp-control/wayland-mcp
+cd tools/wayland-mcp
 chmod +x setup_on_fedora_run_in_vm.sh
 ./setup_on_fedora_run_in_vm.sh
 ```
@@ -48,24 +47,16 @@ What it does:
 - Makes `/dev/input/event*` devices writable (needed for input simulation)
 - Installs wayland-mcp into the venv via `$MY_VENV_PIP install -e .`
 - Verifies mouse and keyboard device detection
+- Generates `.claude/mcp.json` with the correct paths and environment variables
 
-## 4. Configure Claude Code MCP (Scoped to Control Directory)
+The generated `.claude/mcp.json` is git-ignored since it contains machine-specific paths.
 
-Run `setup_mcp_config.sh` to automatically create `.claude/mcp.json` in the control directory. This ensures wayland-mcp only activates when Claude Code is started from `tools/desktop-wayland-mcp-control/`, **not** from your project root.
+## 4. Start Claude Code
+
+Start Claude Code from the wayland-mcp directory so it picks up the MCP config:
 
 ```bash
-# From the wayland-mcp submodule directory:
-./setup_mcp_config.sh
-
-# Or explicitly pass the control directory:
-./setup_mcp_config.sh "$PROJECT_ROOT/tools/desktop-wayland-mcp-control"
-```
-
-This creates `tools/desktop-wayland-mcp-control/.claude/mcp.json` with the correct paths and environment variables.
-
-To use the MCP tools, start Claude Code from the control directory:
-```bash
-cd $PROJECT_ROOT/tools/desktop-wayland-mcp-control
+cd tools/wayland-mcp
 claude
 ```
 
