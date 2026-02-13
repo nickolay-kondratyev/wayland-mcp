@@ -10,7 +10,7 @@
 
 ## Executive Summary
 
-**Overall Risk Level: MEDIUM-HIGH**
+**Overall Risk Level: MEDIUM-HIGH** - RUN ON VM not ON YOUR MAIN MACHINE.
 
 This package is a **legitimate MCP (Model Context Protocol) server** that provides screen capture, mouse control, and keyboard input simulation for Wayland/Linux desktops. It does what it claims to do. However, the nature of what it does (full input device control) is inherently high-privilege and dangerous, and the setup script makes aggressive system-level permission changes.
 

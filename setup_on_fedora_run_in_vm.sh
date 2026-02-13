@@ -43,6 +43,16 @@ main() {
     echo "Please run this script inside a KVM VM for proper setup."
     exit 1
   fi
+  
+  if type linux.is_main_dev_machine &> /dev/null; then
+    if linux.is_main_dev_machine; then
+      echo "We on on the main dev machine, which is unexpected for this script. This script is intended to be run inside a KVM virtual machine, not on the host. Detected environment: $(systemd-detect-virt). Please run this script inside a KVM VM for proper setup."
+      exit 1
+    fi
+  else
+    echo "ERROR: linux.is_main_dev_machine function not found. This function is required to verify that the script is running on the expected environment. Please ensure you have the necessary environment setup and try again."
+    exit 1
+  fi
 
   if [[ -z "${MY_VENV_PYTHON_BIN:-}" ]]; then
     echo "ERROR: MY_VENV_PYTHON_BIN is not set. Expected path to venv python binary (e.g. /home/user/MY_PYTHON_VENV/bin/python3)."
