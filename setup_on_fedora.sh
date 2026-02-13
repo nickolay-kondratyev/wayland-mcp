@@ -44,7 +44,6 @@ main() {
     exit 1
   fi
 
-
   # Setup script for evemu-event mouse control permissions
   # Works immediately without reboot or logout
 
