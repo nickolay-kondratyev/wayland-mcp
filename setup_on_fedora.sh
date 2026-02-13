@@ -38,6 +38,12 @@ install_if_missing() {
 }
 
 main() {
+  if [[ "$(systemd-detect-virt)" != "kvm" ]]; then
+    echo "This setup script is intended to be run inside a KVM virtual machine. Detected environment: $(systemd-detect-virt). As it is NOT meant to run on HOST machine. It should only run within a VM"
+    echo "Please run this script inside a KVM VM for proper setup."
+    exit 1
+  fi
+
 
   # Setup script for evemu-event mouse control permissions
   # Works immediately without reboot or logout
