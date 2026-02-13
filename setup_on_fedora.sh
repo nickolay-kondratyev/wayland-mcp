@@ -141,29 +141,12 @@ main() {
   "${MY_VENV_PYTHON_BIN}" -c "from wayland_mcp.mouse_utils import MouseController; m = MouseController(); print(f'Mouse device: {m.device}')" && echo "Mouse verification OK" || echo "Mouse verification FAILED (may need input devices available)"
   "${MY_VENV_PYTHON_BIN}" -c "from wayland_mcp.keyboard_utils import KeyboardController; k = KeyboardController(); print(f'Keyboard device: {k.device}')" && echo "Keyboard verification OK" || echo "Keyboard verification FAILED (may need input devices available)"
 
-  # 10. Display Claude Code MCP configuration
-  echo ""
-  echo "=== Claude Code MCP Configuration ==="
-  echo "Add the following to ~/.claude.json or .claude/mcp.json:"
-  echo ""
-  cat <<JSONEOF
-{
-  "mcpServers": {
-    "wayland-mcp": {
-      "command": "${MY_VENV_PYTHON_BIN}",
-      "args": ["-m", "wayland_mcp.server_mcp"],
-      "env": {
-        "XDG_RUNTIME_DIR": "/run/user/$(id -u)",
-        "WAYLAND_DISPLAY": "wayland-0",
-        "DISPLAY": ":0",
-        "XDG_SESSION_TYPE": "wayland"
-      }
-    }
-  }
-}
-JSONEOF
+  # 10. Done — point user to setup_mcp_config.sh for Claude Code config
   echo ""
   echo "Setup complete!"
+  echo ""
+  echo "Next step: run ./setup_mcp_config.sh to create the .claude/mcp.json config."
+  echo "See VM_SETUP_CLAUDE_CODE_FEDORA_KVM.md for details."
 }
 
 main "${@}"

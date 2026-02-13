@@ -18,13 +18,25 @@ Quick guide to get screenshot capture + mouse/keyboard control working with Clau
 
 The setup script auto-installs `evemu` and a screenshot tool (`gnome-screenshot` as default) if none of the supported ones (`gnome-screenshot`, `grim`, `ksnip`, `spectacle`) are found.
 
-## 2. Run the Setup Script
+## 2. Add wayland-mcp as a Submodule
 
-The setup script handles everything: installs system packages, sets input device permissions, installs wayland-mcp into your venv, and prints the Claude Code MCP configuration.
+In your project, add wayland-mcp as a submodule under a dedicated control directory. This directory scopes the MCP server so it only activates when Claude Code is started from there (not from your project root).
 
 ```bash
-git clone git@github.com:nickolay-kondratyev/wayland-mcp.git
-cd wayland-mcp
+# From your project root
+mkdir -p tools/desktop-wayland-mcp-control
+git submodule add git@github.com:nickolay-kondratyev/wayland-mcp.git \
+    tools/desktop-wayland-mcp-control/wayland-mcp
+```
+
+> **Why from source?** Running `uvx wayland-mcp` or `pip install wayland-mcp` pulls whatever is currently published to PyPI. Installing from source ensures we run our own code.
+
+## 3. Run the Setup Script
+
+The setup script installs system packages, sets input device permissions, and installs wayland-mcp into your venv.
+
+```bash
+cd tools/desktop-wayland-mcp-control/wayland-mcp
 chmod +x setup_on_fedora.sh
 ./setup_on_fedora.sh
 ```
@@ -36,38 +48,30 @@ What it does:
 - Makes `/dev/input/event*` devices writable (needed for input simulation)
 - Installs wayland-mcp into the venv via `$MY_VENV_PIP install -e .`
 - Verifies mouse and keyboard device detection
-- Prints the Claude Code MCP configuration JSON with correct paths
 
-> **Why from source?** Running `uvx wayland-mcp` or `pip install wayland-mcp` pulls whatever is currently published to PyPI. Installing from source ensures we run our own code.
+## 4. Configure Claude Code MCP (Scoped to Control Directory)
 
-## 3. Configure Claude Code
+Run `setup_mcp_config.sh` to automatically create `.claude/mcp.json` in the control directory. This ensures wayland-mcp only activates when Claude Code is started from `tools/desktop-wayland-mcp-control/`, **not** from your project root.
 
-The setup script prints the exact JSON to use. Add it to `~/.claude.json` (global) or `.claude/mcp.json` (project-level).
+```bash
+# From the wayland-mcp submodule directory:
+./setup_mcp_config.sh
 
-The configuration uses `$MY_VENV_PYTHON_BIN` as the command, so the MCP server runs from your venv:
-
-```json
-{
-  "mcpServers": {
-    "wayland-mcp": {
-      "command": "$MY_VENV_PYTHON_BIN",
-      "args": ["-m", "wayland_mcp.server_mcp"],
-      "env": {
-        "XDG_RUNTIME_DIR": "/run/user/<your-uid>",
-        "WAYLAND_DISPLAY": "wayland-0",
-        "DISPLAY": ":0",
-        "XDG_SESSION_TYPE": "wayland"
-      }
-    }
-  }
-}
+# Or explicitly pass the control directory:
+./setup_mcp_config.sh "$PROJECT_ROOT/tools/desktop-wayland-mcp-control"
 ```
 
-> Replace `$MY_VENV_PYTHON_BIN` with the actual path (the setup script output will have it filled in).
+This creates `tools/desktop-wayland-mcp-control/.claude/mcp.json` with the correct paths and environment variables.
+
+To use the MCP tools, start Claude Code from the control directory:
+```bash
+cd $PROJECT_ROOT/tools/desktop-wayland-mcp-control
+claude
+```
 
 > **Note**: The `OPENROUTER_API_KEY` and `VLM_MODEL` env vars are **not needed**. Those are only for the VLM image analysis features. Claude Code can analyze screenshots itself - you just need the capture and input control tools.
 
-## 4. Available Tools in Claude Code
+## 5. Available Tools in Claude Code
 
 Once connected, Claude Code will have access to these MCP tools:
 
@@ -82,7 +86,7 @@ Once connected, Claude Code will have access to these MCP tools:
 
 The `analyze_screenshot`, `compare_images`, and `capture_and_analyze` tools exist but require an OpenRouter API key - skip these since Claude Code can analyze images directly.
 
-## 5. Example Usage in Claude Code
+## 6. Example Usage in Claude Code
 
 Once configured, you can ask Claude Code things like:
 
